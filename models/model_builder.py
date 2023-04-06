@@ -4,6 +4,7 @@ from tensorflow.keras.models import Model
 from utils.conv2D_args import k3n64s1, k3n3s1, k3n256s1
 from models.backbone.RRFDB import residual_of_receptive_field_dense_block
 from models.backbone.RFB import receptive_field_block
+from models.backbone.RRDB import residual_in_residual_dense_block
 
 
 # def generator(kernel_initializer=tf.keras.initializers.GlorotNormal()):
@@ -44,7 +45,10 @@ def generator_x4(kernel_initializer=tf.keras.initializers.GlorotNormal()):
     x = Conv2D(kernel_initializer=kernel_initializer, **k3n64s1)(x)
     # trunk
     lsc = x
-    for _ in range(23):
+    for _ in range(16):
+        x = residual_in_residual_dense_block(
+            x, kernel_initializer=kernel_initializer)
+    for _ in range(8):
         x = residual_of_receptive_field_dense_block(
             x, kernel_initializer=kernel_initializer)
     x = add([x, lsc])
