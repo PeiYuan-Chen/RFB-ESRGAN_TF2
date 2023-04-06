@@ -1,6 +1,3 @@
-# from  tensorflow.keras.initializers import GlorotNormal
-# def generator(kernel_initializer=GlorotNormal()):
-#     pass
 import tensorflow as tf
 from tensorflow.keras.layers import Input, Conv2D, BatchNormalization, LeakyReLU, UpSampling2D, Flatten, Dense, add
 from tensorflow.keras.models import Model
@@ -53,7 +50,8 @@ def generator_x4(kernel_initializer=tf.keras.initializers.GlorotNormal()):
     x = UpSampling2D(size=(2, 2), interpolation='nearest')(x)
     x = Conv2D(kernel_initializer=kernel_initializer, **k3n64s1)(x)
     x = LeakyReLU(alpha=0.2)(x)
-    x = UpSampling2D(size=(2, 2), interpolation='nearest', name='additional_start_layer')(x)
+    x = UpSampling2D(size=(2, 2), interpolation='nearest',
+                     name='additional_start_layer')(x)
     x = Conv2D(kernel_initializer=kernel_initializer, **k3n64s1)(x)
     x = LeakyReLU(alpha=0.2, name='additional_end_layer')(x)
 
