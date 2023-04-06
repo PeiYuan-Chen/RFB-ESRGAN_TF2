@@ -1,19 +1,19 @@
 # Data settings
 data:
   Use_TFRecord: True
-  TFRecord_file: 'E:/SR_Train_Data/DF2K_bicubic_X2.tfrecord'
-  train_lr_dir: 'data/train/lr_x2'
+  TFRecord_file: 'E:/SR_Train_Data/DF2K_bicubic_x4.tfrecord'
+  train_lr_dir: 'data/train/lr_x4'
   train_hr_dir: 'data/train/hr'
-  val_lr_dir: 'data/val/lr_x2'
+  val_lr_dir: 'data/val/lr_x4'
   val_hr_dir: 'data/val/hr'
-  eval_lr_dir: 'data/eval/lr_x2'
+  eval_lr_dir: 'data/eval/lr_x4'
   eval_hr_dir: 'data/eval/hr'
-  test_lr_dir: 'data/test/lr_x2'
+  test_lr_dir: 'data/test/lr_x4'
   test_hr_dir: 'data/test/hr'
   cache_dir: ''
-  lr_size: 64
+  lr_size: 32
   hr_size: 128
-  upscale_factor: 2
+  upscale_factor: 4
   channels: 3
   batch_size: 1
 

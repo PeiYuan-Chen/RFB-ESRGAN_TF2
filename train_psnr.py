@@ -7,7 +7,7 @@ from tensorflow.keras.utils import load_img, img_to_array
 
 from configs.load_config import cfg
 from datasets.dataloader import sr_input_pipline_from_dir, sr_input_pipline_from_tfrecord
-from models.model_builder import generator
+from models.model_builder import generator_x4
 
 from train_utils.metrics import calculate_psnr, calculate_ssim
 from train_utils.lr_schedules import multistep_lr_schedule
@@ -18,7 +18,7 @@ from train_utils.initializers import scaled_HeNormal
 
 def train():
     # self-define
-    model = generator(kernel_initializer=scaled_HeNormal(0.1))
+    model = generator_x4(kernel_initializer=scaled_HeNormal(0.1))
     loss_fn = make_pixel_loss(criterion='l1')
 
     ###########################

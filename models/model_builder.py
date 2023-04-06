@@ -1,37 +1,39 @@
 import tensorflow as tf
 from tensorflow.keras.layers import Input, Conv2D, BatchNormalization, LeakyReLU, UpSampling2D, Flatten, Dense, add
 from tensorflow.keras.models import Model
-from utils.conv2D_args import k3n64s1, k3n3s1
-from models.backbone.RFA import rfa_3
+from utils.conv2D_args import k3n64s1, k3n3s1, k3n256s1
+from models.backbone.RRFDB import residual_of_receptive_field_dense_block
+from models.backbone.RFB import receptive_field_block
 
 
-def generator(kernel_initializer=tf.keras.initializers.GlorotNormal()):
-    inputs = Input(shape=(None, None, 3))
-    # pre-process
-    x = tf.keras.layers.Rescaling(scale=1.0 / 255)(inputs)
-    # shallow extraction
-    x = Conv2D(kernel_initializer=kernel_initializer, **k3n64s1)(x)
-    # trunk
-    lsc = x
-    for _ in range(24):
-        x = rfa_3(x, kernel_initializer=kernel_initializer)
-    x = add([x, lsc])
-    # upsample nearest
-    x = Conv2D(kernel_initializer=kernel_initializer, **k3n64s1)(x)
-    x = UpSampling2D(size=(2, 2), interpolation='nearest')(x)
-    x = Conv2D(kernel_initializer=kernel_initializer, **k3n64s1)(x)
-    x = LeakyReLU(alpha=0.2)(x)
+# def generator(kernel_initializer=tf.keras.initializers.GlorotNormal()):
+#     inputs = Input(shape=(None, None, 3))
+#     # pre-process
+#     x = tf.keras.layers.Rescaling(scale=1.0 / 255)(inputs)
+#     # shallow extraction
+#     x = Conv2D(kernel_initializer=kernel_initializer, **k3n64s1)(x)
+#     # trunk
+#     lsc = x
+#     for _ in range(23):
+#         x = residual_of_receptive_field_dense_block(
+#             x, kernel_initializer=kernel_initializer)
+#     x = add([x, lsc])
+#     # upsample nearest
+#     x = Conv2D(kernel_initializer=kernel_initializer, **k3n64s1)(x)
+#     x = UpSampling2D(size=(2, 2), interpolation='nearest')(x)
+#     x = Conv2D(kernel_initializer=kernel_initializer, **k3n64s1)(x)
+#     x = LeakyReLU(alpha=0.2)(x)
 
-    # reconstruct
-    x = Conv2D(kernel_initializer=kernel_initializer, **k3n64s1)(x)
-    x = LeakyReLU(alpha=0.2)(x)
-    x = Conv2D(kernel_initializer=kernel_initializer, **k3n3s1)(x)
+#     # reconstruct
+#     x = Conv2D(kernel_initializer=kernel_initializer, **k3n64s1)(x)
+#     x = LeakyReLU(alpha=0.2)(x)
+#     x = Conv2D(kernel_initializer=kernel_initializer, **k3n3s1)(x)
 
-    # post-process
-    outputs = tf.keras.layers.Rescaling(scale=255)(x)
-    model = Model(inputs=inputs, outputs=outputs)
-    print(model.summary())
-    return model
+#     # post-process
+#     outputs = tf.keras.layers.Rescaling(scale=255)(x)
+#     model = Model(inputs=inputs, outputs=outputs)
+#     print(model.summary())
+#     return model
 
 
 def generator_x4(kernel_initializer=tf.keras.initializers.GlorotNormal()):
@@ -42,18 +44,22 @@ def generator_x4(kernel_initializer=tf.keras.initializers.GlorotNormal()):
     x = Conv2D(kernel_initializer=kernel_initializer, **k3n64s1)(x)
     # trunk
     lsc = x
-    for _ in range(24):
-        x = rfa_3(x, kernel_initializer=kernel_initializer)
+    for _ in range(23):
+        x = residual_of_receptive_field_dense_block(
+            x, kernel_initializer=kernel_initializer)
     x = add([x, lsc])
+    x = receptive_field_block(
+        x, input_channels=64, output_channels=64, kernel_initializer=kernel_initializer)
     # upsample nearest
-    x = Conv2D(kernel_initializer=kernel_initializer, **k3n64s1)(x)
     x = UpSampling2D(size=(2, 2), interpolation='nearest')(x)
-    x = Conv2D(kernel_initializer=kernel_initializer, **k3n64s1)(x)
+    x = receptive_field_block(
+        x, input_channels=64, output_channels=64, kernel_initializer=kernel_initializer)
     x = LeakyReLU(alpha=0.2)(x)
-    x = UpSampling2D(size=(2, 2), interpolation='nearest',
-                     name='additional_start_layer')(x)
-    x = Conv2D(kernel_initializer=kernel_initializer, **k3n64s1)(x)
-    x = LeakyReLU(alpha=0.2, name='additional_end_layer')(x)
+    x = Conv2D(kernel_initializer=kernel_initializer, **k3n256s1)(x)
+    x = tf.nn.depth_to_space(x, block_size=2)
+    x = receptive_field_block(
+        x, input_channels=64, output_channels=64, kernel_initializer=kernel_initializer)
+    x = LeakyReLU(alpha=0.2)(x)
 
     # reconstruct
     x = Conv2D(kernel_initializer=kernel_initializer, **k3n64s1)(x)
