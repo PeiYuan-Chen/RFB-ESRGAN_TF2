@@ -1,1 +1,5 @@
 __pycache__/
+history.json
+best_weight.h5
+checkpoint
+ckpt*
